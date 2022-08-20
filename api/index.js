@@ -13,7 +13,7 @@ const categoryRoutes = require("./routes/category");
 const dishRoutes = require("./routes/dish");
 
 const PORT = process.env.PORT || 5000;
-const PREFIX = process.env.PREFIX;
+const PREFIX = "/" + process.env.PREFIX;
 const app = express();
 
 app.use(cors());
