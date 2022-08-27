@@ -24,9 +24,7 @@ app.use(express.urlencoded({ limit: "1mb", extended: true }));
 app.use(PREFIX, categoryRoutes);
 app.use(PREFIX, dishRoutes);
 
-app.post("/create", (req, res, next) => {
-  console.log("requestr obj", req.body);
-});
+app.post("/create", (req, res, next) => {});
 
 app.get("/", (req, res) => {
   res.send({ message: Math.random() });

@@ -2,6 +2,29 @@ const Dish = require("../models/Dish");
 const createError = require("http-errors");
 const imageTypes = ["image/jpg", "image/jpeg", "image/png", "image/gif"];
 const { dishSchemaValidator } = require("../validators/schema-validator");
+const chalk = require("chalk");
+
+exports.searchByCategory = async (req, res, next) => {
+  const { categories } = req.body;
+
+  let criteria = {};
+
+  try {
+    if (categories.length === 0) {
+      return next(createError(404, "No categories specified"));
+    }
+
+    criteria = { category: { $in: categories } };
+
+    const result = await Dish.find(criteria)
+      .select("-photo")
+      .populate("category", "_id name");
+
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
 
 exports.getDishPhoto = async (req, res) => {
   const dish = req.dish;
@@ -29,7 +52,6 @@ exports.getDish = async (req, res, next, id) => {
       next(createError(404, "Category not found"));
       return;
     }
-    console.log("still running", dish);
 
     req.dish = dish;
     next();
@@ -38,7 +60,6 @@ exports.getDish = async (req, res, next, id) => {
     // 	"🚀 ~ file: categories.js ~ line 58 ~ exports.getCategoryById= ~ error",
     // 	error
     // );
-    console.log("error hai bhai", error);
 
     next(404, createError(error));
   }
@@ -47,19 +68,28 @@ exports.getDish = async (req, res, next, id) => {
 exports.getAllDishes = (req, res, next) => {
   // query the database for all categories
 
-  Dish.find({})
+  let allDishQuery = {};
+
+  if (req.query.categories) {
+    allDishQuery.category = {
+      $in: req.query.categories,
+    };
+  }
+
+  console.log("alldishes", allDishQuery);
+
+  Dish.find(allDishQuery)
     .populate("category", "_id, name")
     .exec()
     .then((result) => {
-      if (result.length === 0) {
+      /* if (result.length === 0) {
         return next(createError(404, "No dishes found"));
-      }
-      console.log("🚀 ~ file: categories.js ~ line 9 ~ result ~ res", result);
+      } */
+      result.photo = undefined;
+
       res.status(200).send(result);
     })
-    .catch((err) => {
-      console.log("🚀 ~ file: categories.js ~ line 12 ~ .then ~ err", err);
-    });
+    .catch((err) => {});
 };
 
 exports.createDish = (req, res, next) => {
@@ -90,7 +120,6 @@ exports.createDish = (req, res, next) => {
       res.status(201).json(result);
     })
     .catch((err) => {
-      console.log("error in creating cateogory", err);
       if (err.message.includes("E11000")) {
         return next(
           createError.Conflict(

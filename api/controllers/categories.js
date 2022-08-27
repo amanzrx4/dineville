@@ -11,18 +11,13 @@ exports.getAllCategories = (req, res, next) => {
       if (result.length === 0) {
         return next(createError(404, "No categories found"));
       }
-      console.log("🚀 ~ file: categories.js ~ line 9 ~ result ~ res", result);
       res.status(200).send(result);
     })
-    .catch((err) => {
-      console.log("🚀 ~ file: categories.js ~ line 12 ~ .then ~ err", err);
-    });
+    .catch((err) => {});
 };
 
 exports.createCategory = (req, res, next) => {
   const { error: validationError } = categorySchemaValidator.validate(req.body);
-
-  console.log("req object", req.body);
 
   // console.log("value" + value + "\n" + "error" + error);
   if (validationError) {
@@ -39,7 +34,6 @@ exports.createCategory = (req, res, next) => {
       res.status(201).json(result);
     })
     .catch((err) => {
-      console.log("error in creating cateogory", err);
       if (err.message.includes("E11000")) {
         return next(
           createError.Conflict(
@@ -54,15 +48,10 @@ exports.createCategory = (req, res, next) => {
 exports.getCategoryById = async (req, res, next) => {
   try {
     const categoryById = await Category.findById(req.params.id).exec();
-    // if (!categoryById) {
-    // 	next(createError(404, "Category not found"));
-    // 	res.end()
-    // }
     if (!categoryById) {
       next(createError(404, "Category not found"));
       return;
     }
-    console.log("still running", categoryById);
 
     res.status(200).json(categoryById);
   } catch (error) {
